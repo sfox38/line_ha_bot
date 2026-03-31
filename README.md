@@ -176,7 +176,7 @@ When adding a recipient, two name fields are shown:
 - **Display name** - shown in the HA UI. Accepts any characters including emoji, Thai, Japanese, and other unicode. Defaults to the LINE display name.
 - **Entity name** - used to generate the HA entity ID (`notify.line_bot_<entity_name>`). Must contain only ASCII letters (a-z, A-Z), digits (0-9), spaces, hyphens, and underscores.
 
-The integration suggests a safe entity name from the LINE display name automatically. Emoji are converted to their English name (e.g. 🦊 becomes "fox"), Thai and Japanese characters are romanized, and ASCII characters are kept as-is. For example, `"สวัสดี🦊 Steven"` suggests `"swasdii_fox_steven"`. You can override the suggestion with anything that meets the rules.
+The integration suggests a safe entity name from the LINE display name automatically. Emoji are converted to their English name (e.g. 🤓 becomes "nerd"), Thai and Japanese characters are romanized, and ASCII characters are kept as-is. For example, `"สวัสดี 🤓 David"` suggests `"swasdii_nerd_david"`. You can override the suggestion with anything that meets the rules.
 
 Note: captured recipients survive HA restarts. If someone messages your bot before you open the options flow, they will still appear in the dropdown after a restart.
 
@@ -193,7 +193,7 @@ Use `notify.send_message` for simple text messages and title. This is the standa
 ```yaml
 action: notify.send_message
 target:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
 data:
   message: "Front door opened"
   title: "Security Alert"
@@ -206,7 +206,7 @@ Use `line_ha_bot.send_message` for the full feature set: images, audio, video, s
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   message: "Front door opened"
 ```
 
@@ -216,8 +216,8 @@ Multiple recipients can be targeted in a single call:
 action: line_ha_bot.send_message
 data:
   entity_id:
-    - notify.line_bot_steve
-    - notify.line_bot_wife
+    - notify.line_bot_david
+    - notify.line_bot_gretel
   message: "Dinner is ready"
 ```
 
@@ -226,7 +226,7 @@ data:
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   title: "Security Alert"
   message: "Motion detected in the garden"
 ```
@@ -238,7 +238,7 @@ The image URL must be publicly accessible via HTTPS.
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   message: "Camera snapshot"
   image_url: "https://example.com/snapshot.jpg"
 ```
@@ -250,7 +250,7 @@ Audio must be in M4A format and accessible via HTTPS. `audio_duration` is in mil
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   audio_url: "https://example.com/alert.m4a"
   audio_duration: 3000
 ```
@@ -262,7 +262,7 @@ data:
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   video_url: "https://example.com/clip.mp4"
   video_preview_url: "https://example.com/clip-thumb.jpg"
 ```
@@ -274,7 +274,7 @@ LINE sticker package and sticker IDs can be found in the [LINE sticker list](htt
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   message: "Done!"
   sticker_package_id: "1"
   sticker_id: "1"
@@ -287,9 +287,9 @@ data:
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   location_title: "Home"
-  location_address: "123 Main St, Bangkok"
+  location_address: "123 Main St, Seattle"
   location_latitude: 13.7563
   location_longitude: 100.5018
 ```
@@ -301,7 +301,7 @@ Pass the raw LINE flex message JSON as `flex_message` (the `contents` object). `
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   flex_alt_text: "Motion alert"
   flex_message:
     type: bubble
@@ -324,7 +324,7 @@ Supports up to 4 buttons. Each button needs `label`, `action` (`message`, `postb
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   message: "Choose an action"
   template_type: buttons
   template_title: "Home Control"
@@ -348,7 +348,7 @@ Requires exactly 2 buttons. Useful for Yes/No decisions sent to LINE.
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   message: "Motion detected. Turn on the lights?"
   template_type: confirm
   flex_alt_text: "Motion alert"
@@ -382,7 +382,7 @@ Quick reply chips appear above the LINE keyboard after any message and disappear
 ```yaml
 action: line_ha_bot.send_message
 data:
-  entity_id: notify.line_bot_steve
+  entity_id: notify.line_bot_david
   message: "Motion detected. What would you like to do?"
   quick_replies:
     - label: "Turn on lights"
@@ -410,9 +410,9 @@ data:
   type: text               # message type: text, image, audio, video, sticker, postback
   user_id: "Uabc123..."   # LINE user ID of the sender
   group_id: null           # LINE group ID, or null for direct messages
-  entity_id: notify.line_bot_steve  # HA entity ID of the matched recipient
-  recipient_name: steve    # HA name of the matched recipient
-  display_name: "Steve"   # LINE display name of the recipient
+  entity_id: notify.line_bot_david  # HA entity ID of the matched recipient
+  recipient_name: david    # HA name of the matched recipient
+  display_name: "David"   # LINE display name of the recipient
   message_text: "hello"   # message text, or null for non-text types
   message_id: "12345"     # LINE message ID
   content_url: "https://api-data.line.me/v2/bot/message/12345/content"  # for image/audio/video, null otherwise
@@ -465,8 +465,8 @@ When a send fails for any reason, HA fires a `line_bot_send_failed` event. You c
 ```yaml
 event_type: line_bot_send_failed
 data:
-  entity_id: notify.line_bot_steve
-  recipient_name: steve
+  entity_id: notify.line_bot_david
+  recipient_name: david
   error_type: connection_error   # token_invalid, bad_request, reply_token_expired, http_error, connection_error
   error_message: "Cannot connect to host api.line.me:443..."
   http_status: null              # HTTP status code, or null for connection errors
