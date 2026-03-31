@@ -55,6 +55,7 @@ A Home Assistant custom integration that connects your LINE Official Account to 
 - Error events (`line_bot_send_failed`) for failed sends, enabling retry or alert automations.
 - Quick reply chips on any message type, giving recipients one-tap response options.
 - Full UI configuration. No YAML required.
+- Lightweight, does not depend on any external libraries
 - Signature-verified webhook for security.
 
 ---
