@@ -5,15 +5,12 @@ A Home Assistant custom integration that connects your LINE Official Account to 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 ![HA Version](https://img.shields.io/badge/HA-2024.11%2B-blue)
 
-
-
-> [!NOTE]
-> This is pre-release. I will not create a package until it is feature complete, fully tested and fully documented. Should be completed by mid-April 2026.
 ---
 
 ## Index
 
 - [Features](#features)
+- [Supported Languages](#supported-languages)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Setup](#setup)
@@ -31,6 +28,7 @@ A Home Assistant custom integration that connects your LINE Official Account to 
   - [Button template](#button-template)
   - [Confirm template](#confirm-template)
   - [Reply token](#reply-token)
+  - [Quick replies](#quick-replies)
 - [Incoming Messages](#incoming-messages)
   - [line_bot_message_received event](#line_bot_message_received-event)
   - [Responding to messages](#responding-to-messages)
@@ -41,6 +39,7 @@ A Home Assistant custom integration that connects your LINE Official Account to 
 - [Options](#options)
 - [Troubleshooting](#troubleshooting)
 - [Message Quota](#message-quota)
+- [License](#license)
 
 ---
 
@@ -54,6 +53,7 @@ A Home Assistant custom integration that connects your LINE Official Account to 
 - Webhook-based recipient discovery: message the bot and it appears automatically in the setup flow.
 - Monthly quota sensors showing message limit and consumption.
 - Error events (`line_bot_send_failed`) for failed sends, enabling retry or alert automations.
+- Quick reply chips on any message type, giving recipients one-tap response options.
 - Full UI configuration. No YAML required.
 - Signature-verified webhook for security.
 
@@ -85,9 +85,38 @@ Keep both values private. Anyone with your Channel Access Token can send message
 
 ### 4. Configure your Home Assistant external URL
 
-This integration requires your Home Assistant instance to be reachable from the internet via HTTPS so that LINE can POST webhook events to it. A Cloudflare tunnel, reverse proxy with a domain, or Nabu Casa subscription will all work.
+LINE requires your Home Assistant instance to be reachable from the internet via a **public HTTPS URL with a valid SSL certificate**. A plain HTTP address (e.g. ) or a self-signed certificate will not work. This is a hard requirement on LINE's side.
 
-Set your external URL at **Settings > System > Network > Home Assistant URL (External)**.
+You have several options, listed from easiest to most technical:
+
+**Option A: Nabu Casa (easiest)**
+A Home Assistant Cloud subscription gives you a ready-made HTTPS domain with no configuration required. Costs approximately USD /month. See https://www.nabucasa.com.
+
+**Option B: Cloudflare Tunnel (free)**
+Cloudflare Tunnel routes your local HA through Cloudflare's network, giving you a proper HTTPS domain for free. Install the **Cloudflare** add-on from the HA add-on store, create a free Cloudflare account, and follow the add-on instructions.
+
+**Option C: DuckDNS + Let's Encrypt (free)**
+DuckDNS gives you a free dynamic DNS hostname (e.g. ). Combined with the **DuckDNS** and **Let's Encrypt** HA add-ons, you get a valid HTTPS URL at no cost. Requires your router to forward port 443 to your HA instance.
+
+**Option D: Reverse proxy with your own domain**
+If you own a domain name, point it at your home IP, set up a reverse proxy (e.g. NGINX), and use Let's Encrypt for SSL. Most technical option but gives you the most control.
+
+Once you have a working HTTPS URL, set it in HA at **Settings > System > Network > Home Assistant URL (External)**.
+
+---
+
+## Supported Languages
+
+The setup and configuration UI is available in the following languages:
+
+- English
+- Thai (ภาษาไทย)
+- Japanese (日本語)
+- Traditional Chinese (正體中文)
+- Indonesian (Bahasa Indonesia)
+- Korean (한국어)
+
+Home Assistant will automatically use your configured language if it is supported, falling back to English otherwise.
 
 ---
 
@@ -140,9 +169,16 @@ Each recipient becomes a `notify` entity named `notify.line_bot_<name>`. Recipie
 3. In HA, go to the integration options (gear icon) and select **Add a recipient**. The group will appear in the dropdown.
 4. Select it and enter a name.
 
-### Recipient name rules
+### Recipient names
 
-Names must contain only ASCII letters (a-z, A-Z), digits (0-9), spaces, hyphens, and underscores. Emoji, Thai, Japanese, and other non-ASCII characters are not allowed. The integration suggests a safe default name from the LINE display name, but you can type anything that meets the rules.
+When adding a recipient, two name fields are shown:
+
+- **Display name** - shown in the HA UI. Accepts any characters including emoji, Thai, Japanese, and other unicode. Defaults to the LINE display name.
+- **Entity name** - used to generate the HA entity ID (`notify.line_bot_<entity_name>`). Must contain only ASCII letters (a-z, A-Z), digits (0-9), spaces, hyphens, and underscores.
+
+The integration suggests a safe entity name from the LINE display name automatically. Emoji are converted to their English name (e.g. 🦊 becomes "fox"), Thai and Japanese characters are romanized, and ASCII characters are kept as-is. For example, `"สวัสดี🦊 Steven"` suggests `"swasdii_fox_steven"`. You can override the suggestion with anything that meets the rules.
+
+Note: captured recipients survive HA restarts. If someone messages your bot before you open the options flow, they will still appear in the dropdown after a restart.
 
 ---
 
@@ -339,6 +375,27 @@ data:
 
 Reply tokens expire after 30 seconds and can only be used once. After expiry, omit `reply_token` to fall back to the Push API.
 
+### Quick replies
+
+Quick reply chips appear above the LINE keyboard after any message and disappear once tapped. They work with all message types. Each chip needs `label`, `action` (`message`, `postback`, or `uri`), and `data`.
+
+```yaml
+action: line_ha_bot.send_message
+data:
+  entity_id: notify.line_bot_steve
+  message: "Motion detected. What would you like to do?"
+  quick_replies:
+    - label: "Turn on lights"
+      action: postback
+      data: "lights=on"
+    - label: "Ignore"
+      action: postback
+      data: "lights=ignore"
+    - label: "View camera"
+      action: uri
+      data: "https://example.com/camera"
+```
+
 ---
 
 ## Incoming Messages
@@ -508,3 +565,9 @@ LINE Official Accounts on the free plan can send 500 messages per month. Each re
 Monitor your usage with the [quota sensors](#quota-sensors).
 
 For higher volume, see [LINE Messaging API pricing](https://developers.line.biz/en/docs/messaging-api/pricing/).
+
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE) for details.
