@@ -3,6 +3,7 @@
 A Home Assistant custom integration that connects your LINE Official Account to Home Assistant. Send rich messages to LINE users and groups from automations, and trigger automations from incoming LINE messages.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+![Version](https://img.shields.io/badge/version-1.0.3-blue)
 ![HA Version](https://img.shields.io/badge/HA-2024.11%2B-blue)
 
 ---
@@ -86,18 +87,18 @@ Keep both values private. Anyone with your Channel Access Token can send message
 
 ### 4. Configure your Home Assistant external URL
 
-LINE requires your Home Assistant instance to be reachable from the internet via a **public HTTPS URL with a valid SSL certificate**. A plain HTTP address (e.g. ) or a self-signed certificate will not work. This is a hard requirement on LINE's side.
+LINE requires your Home Assistant instance to be reachable from the internet via a **public HTTPS URL with a valid SSL certificate**. A plain HTTP address (e.g. `http://192.168.1.x:8123`) or a self-signed certificate will not work. This is a hard requirement on LINE's side.
 
 You have several options, listed from easiest to most technical:
 
 **Option A: Nabu Casa (easiest)**
-A Home Assistant Cloud subscription gives you a ready-made HTTPS domain with no configuration required. See https://www.nabucasa.com.
+A Home Assistant Cloud subscription gives you a ready-made HTTPS domain with no configuration required. See https://www.nabucasa.com for current pricing.
 
 **Option B: Cloudflare Tunnel (free)**
 Cloudflare Tunnel routes your local HA through Cloudflare's network, giving you a proper HTTPS domain for free. Install the **Cloudflare** add-on from the HA add-on store, create a free Cloudflare account, and follow the add-on instructions.
 
 **Option C: DuckDNS + Let's Encrypt (free)**
-DuckDNS gives you a free dynamic DNS hostname (e.g. ). Combined with the **DuckDNS** and **Let's Encrypt** HA add-ons, you get a valid HTTPS URL at no cost. Requires your router to forward port 443 to your HA instance.
+DuckDNS gives you a free dynamic DNS hostname (e.g. `your-name.duckdns.org`). Combined with the **DuckDNS** and **Let's Encrypt** HA add-ons, you get a valid HTTPS URL at no cost. Requires your router to forward port 443 to your HA instance.
 
 **Option D: Reverse proxy with your own domain**
 If you own a domain name, point it at your home IP, set up a reverse proxy (e.g. NGINX), and use Let's Encrypt for SSL. Most technical option but gives you the most control.
@@ -154,7 +155,7 @@ After setup, add recipients via the gear icon on the integration card.
 
 ## Recipients
 
-Each recipient becomes a `notify` entity named `notify.line_bot_<name>`. Recipients can be individual LINE users or LINE groups.
+Each recipient becomes a `notify` entity named `notify.line_bot_<recipient_name>`. Recipients can be individual LINE users or LINE groups.
 
 ### Adding a user recipient
 
@@ -175,7 +176,7 @@ Each recipient becomes a `notify` entity named `notify.line_bot_<name>`. Recipie
 When adding a recipient, two name fields are shown:
 
 - **Display name** - shown in the HA UI. Accepts any characters including emoji, Thai, Japanese, and other unicode. Defaults to the LINE display name.
-- **Entity name** - used to generate the HA entity ID (`notify.line_bot_<entity_name>`). Must contain only ASCII letters (a-z, A-Z), digits (0-9), spaces, hyphens, and underscores.
+- **Entity name** (`recipient_name`) - used to generate the HA entity ID (`notify.line_bot_<recipient_name>`). Must contain only ASCII letters (a-z, A-Z), digits (0-9), spaces, hyphens, and underscores.
 
 The integration suggests a safe entity name from the LINE display name automatically. Emoji are converted to their English name (e.g. 🤓 becomes "nerd"), Thai and Japanese characters are romanized, and ASCII characters are kept as-is. For example, `"สวัสดี 🤓 David"` suggests `"swasdii_nerd_david"`. You can override the suggestion with anything that meets the rules.
 
@@ -408,7 +409,7 @@ When a known recipient or group member sends a message to your bot, HA fires a `
 ```yaml
 event_type: line_bot_message_received
 data:
-  type: text               # message type: text, image, audio, video, sticker, postback
+  type: text               # message type: text, image, audio, video, file, sticker, location, postback
   user_id: "Uabc123..."   # LINE user ID of the sender
   group_id: null           # LINE group ID, or null for direct messages
   entity_id: notify.line_bot_david  # HA entity ID of the matched recipient
@@ -442,7 +443,7 @@ actions:
 
 ### Postback events
 
-When a user taps a postback button, a `line_bot_message_received` event fires with `type: postback` and the `postback_data` string you defined on the button. Use `event_data` on the trigger to filter for specific postback values:
+When a user taps a postback button or quick reply with `action: postback`, a `line_bot_message_received` event fires with `type: postback` and the `postback_data` string you defined on the button. Note that postback events from older messages do not carry a `reply_token`. Use `event_data` on the trigger to filter for specific postback values:
 
 ```yaml
 triggers:
@@ -528,7 +529,7 @@ The webhook view is not registered yet. Make sure the integration is installed a
 
 ### Webhook Verify returns 400 or 403
 
-The request is failing signature verification. Check that your Channel Secret is correct. You can update it via the integration options (gear icon) and select **Update credentials**.
+This is unlikely to be caused by a wrong Channel Secret - LINE's Verify button sends a request with an empty events array, which bypasses signature verification entirely. A 400 or 403 response typically means the webhook URL is malformed or the integration is not running correctly. Check the HA logs for details, ensure the integration is loaded, and verify the URL was copied exactly from the setup screen.
 
 ### No message received in the add recipient spinner
 
@@ -561,11 +562,11 @@ logger:
 
 ## Message Quota
 
-LINE Official Accounts on the free plan can send 500 messages per month. Each recipient counts as one message per send call, regardless of how many message objects are in the payload (text plus image is still one message). Reply API messages are free and do not count against the quota.
+The free monthly message limit varies by country and plan. Check your LINE Official Account plan for the exact limit. Each recipient counts as one message per send call, regardless of how many message objects are in the payload (text plus image is still one message). Reply API messages are free and do not count against the quota.
 
 Monitor your usage with the [quota sensors](#quota-sensors).
 
-For higher volume, see [LINE Messaging API pricing](https://developers.line.biz/en/docs/messaging-api/pricing/).
+For details, see [LINE Messaging API pricing](https://developers.line.biz/en/docs/messaging-api/pricing/).
 
 ---
 
