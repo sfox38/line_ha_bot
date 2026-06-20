@@ -1,0 +1,5 @@
+# Test dependencies for the LINE Bot custom integration.
+# pytest-homeassistant-custom-component pins a matching Home Assistant version
+# and pulls in pytest, pytest-asyncio, and the HA test helpers.
+pytest-homeassistant-custom-component==0.13.339
+pytest-cov

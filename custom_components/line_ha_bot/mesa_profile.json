@@ -1,0 +1,23 @@
+{
+  "semantic_profile": {
+    "schema_version": "1.0",
+    "semantic_tags": ["resource.cloud_dependent", "line_ha_bot.messaging"],
+    "operational_boundaries": {
+      "control_mode": "confirm",
+      "enforcement_mode": "advisory",
+      "reversible": false,
+      "reversibility_cost": "moderate",
+      "side_effect_scope": "deployment_wide",
+      "control_reason": "The LINE Bot notify entities send messages to real people and groups through LINE's cloud service: a sent message cannot be unsent and reaches recipients outside the home. An agent should confirm before sending. (The integration's other entities are read-only monthly message-quota sensors.)"
+    },
+    "metadata_origin": {
+      "source": "developer",
+      "confidence": 0.9
+    }
+  },
+  "privacy_classification": {
+    "level": "normal",
+    "access_logging_recommended": true,
+    "privacy_note": "Sending a notification delivers the message text to LINE recipients (users or groups) through LINE's cloud, so the message content and the act of contacting those people leave the home to a third party."
+  }
+}

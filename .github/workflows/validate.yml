@@ -1,0 +1,34 @@
+name: Validate
+
+# Standard validation for HACS custom integrations: Home Assistant's hassfest
+# (manifest, services, strings, etc.) and the HACS repository structure check.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Re-run daily so upstream changes to hassfest/HACS rules are caught early.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  hassfest:
+    name: Hassfest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run hassfest
+        uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    name: HACS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run HACS validation
+        uses: hacs/action@main
+        with:
+          category: integration
+          # Remove "brands" once the line_ha_bot domain is accepted into the
+          # home-assistant/brands repository.
+          ignore: brands

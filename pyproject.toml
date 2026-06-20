@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".git", ".venv"]
+asyncio_mode = "auto"
+addopts = "--cov=custom_components.line_ha_bot --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["custom_components/line_ha_bot"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
